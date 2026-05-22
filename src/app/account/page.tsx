@@ -1,0 +1,272 @@
+"use client"
+
+import { useState } from "react"
+import Navbar from "@/components/layout/navbar"
+import Footer from "@/components/layout/footer"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { motion } from "framer-motion"
+import { User, ShoppingBag, Heart, MapPin, Settings, Package, Clock, CheckCircle, XCircle } from "lucide-react"
+
+export default function AccountPage() {
+  const [activeTab, setActiveTab] = useState("orders")
+
+  // Mock orders data
+  const orders = [
+    {
+      id: "SC12345678",
+      date: "2024-01-15",
+      status: "DELIVERED",
+      total: 1299,
+      items: 2,
+    },
+    {
+      id: "SC87654321",
+      date: "2024-01-20",
+      status: "PROCESSING",
+      total: 899,
+      items: 1,
+    },
+    {
+      id: "SC56781234",
+      date: "2024-01-25",
+      status: "SHIPPED",
+      total: 1599,
+      items: 3,
+    },
+  ]
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "DELIVERED":
+        return "text-green-600 bg-green-100"
+      case "PROCESSING":
+        return "text-blue-600 bg-blue-100"
+      case "SHIPPED":
+        return "text-amber-600 bg-amber-100"
+      case "CANCELLED":
+        return "text-red-600 bg-red-100"
+      default:
+        return "text-gray-600 bg-gray-100"
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "DELIVERED":
+        return <CheckCircle className="h-4 w-4" />
+      case "CANCELLED":
+        return <XCircle className="h-4 w-4" />
+      default:
+        return <Clock className="h-4 w-4" />
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+      <Navbar />
+      
+      <div className="container mx-auto px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl font-bold mb-2 text-gray-900">My Account</h1>
+          <p className="text-gray-600">Manage your orders, wishlist, and account settings</p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+                    <User className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">John Doe</h3>
+                    <p className="text-sm text-gray-600">john@example.com</p>
+                  </div>
+                </div>
+
+                <nav className="space-y-2">
+                  <Button
+                    variant={activeTab === "orders" ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab("orders")}
+                  >
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    Orders
+                  </Button>
+                  <Button
+                    variant={activeTab === "wishlist" ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab("wishlist")}
+                  >
+                    <Heart className="mr-2 h-4 w-4" />
+                    Wishlist
+                  </Button>
+                  <Button
+                    variant={activeTab === "addresses" ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab("addresses")}
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Addresses
+                  </Button>
+                  <Button
+                    variant={activeTab === "settings" ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => setActiveTab("settings")}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Button>
+                </nav>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
+                <TabsTrigger value="addresses">Addresses</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+
+              {/* Orders Tab */}
+              <TabsContent value="orders" className="space-y-4">
+                {orders.map((order, index) => (
+                  <motion.div
+                    key={order.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4 mb-2">
+                              <h3 className="font-semibold">Order #{order.id}</h3>
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}
+                              >
+                                {getStatusIcon(order.status)}
+                                {order.status}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">
+                              Placed on {new Date(order.date).toLocaleDateString("en-IN", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                              {order.items} {order.items === 1 ? "item" : "items"} • Total: ₹{order.total}
+                            </p>
+                          </div>
+                          <Button variant="outline">View Details</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </TabsContent>
+
+              {/* Wishlist Tab */}
+              <TabsContent value="wishlist">
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
+                    <p className="text-gray-600 mb-6">
+                      Save your favorite items for later
+                    </p>
+                    <Button variant="luxury">Explore Collection</Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Addresses Tab */}
+              <TabsContent value="addresses">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Saved Addresses</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-amber-700" />
+                          <span className="font-semibold">Home</span>
+                          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">Default</span>
+                        </div>
+                        <Button variant="ghost" size="sm">Edit</Button>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        John Doe<br />
+                        +91 98765 43210<br />
+                        123 Main Street, Apartment 4B<br />
+                        Mumbai, Maharashtra 400001<br />
+                        India
+                      </p>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      + Add New Address
+                    </Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Settings Tab */}
+              <TabsContent value="settings">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Account Settings</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Full Name</label>
+                      <input
+                        type="text"
+                        defaultValue="John Doe"
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Email</label>
+                      <input
+                        type="email"
+                        defaultValue="john@example.com"
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Phone</label>
+                      <input
+                        type="tel"
+                        defaultValue="+91 98765 43210"
+                        className="w-full px-3 py-2 border rounded-md"
+                      />
+                    </div>
+                    <Button variant="luxury">Save Changes</Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  )
+}
