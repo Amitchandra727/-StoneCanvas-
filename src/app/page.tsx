@@ -5,10 +5,45 @@ import Footer from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { Heart, Star, Gift, Sparkles, Award, Truck, Shield, Clock, Gem, Palette, Zap } from "lucide-react"
+import { Heart, Star, Gift, Sparkles, Award, Truck, Shield, Clock, Gem, Palette, Zap, Users, CheckCircle, MessageSquare } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import TrustBadges from "@/components/features/trust-badges"
 
 export default function Home() {
+  const [happyCustomers, setHappyCustomers] = useState(0)
+  const [customerRating, setCustomerRating] = useState(0)
+  const [ordersDelivered, setOrdersDelivered] = useState(0)
+
+  useEffect(() => {
+    const animateCounters = () => {
+      const duration = 2000
+      const steps = 60
+      const interval = duration / steps
+
+      let step = 0
+      const timer = setInterval(() => {
+        step++
+        const progress = step / steps
+        
+        setHappyCustomers(Math.floor(1000 * progress))
+        setCustomerRating(parseFloat((4.9 * progress).toFixed(1)))
+        setOrdersDelivered(Math.floor(5000 * progress))
+
+        if (step >= steps) {
+          clearInterval(timer)
+          setHappyCustomers(1000)
+          setCustomerRating(4.9)
+          setOrdersDelivered(5000)
+        }
+      }, interval)
+
+      return () => clearInterval(timer)
+    }
+
+    animateCounters()
+  }, [])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:bg-gray-900">
       <Navbar />
@@ -85,8 +120,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Trust Badges */}
+      <section className="py-12 bg-white dark:bg-gray-800 border-b border-amber-100 dark:border-gray-700">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { icon: Users, value: happyCustomers, label: "Happy Customers", suffix: "+" },
+              { icon: Star, value: customerRating, label: "Customer Rating", suffix: "/5" },
+              { icon: Truck, value: ordersDelivered, label: "Orders Delivered", suffix: "+" },
+              { icon: Shield, value: "100%", label: "Secure Payments", suffix: "" },
+            ].map((badge, index) => (
+              <motion.div
+                key={badge.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <badge.icon className="h-8 w-8 mx-auto mb-3 text-amber-600 dark:text-amber-400" />
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+                  {badge.value}{badge.suffix}
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{badge.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Featured Categories */}
-      <section className="py-24 bg-gradient-to-b from-white to-amber-50/50">
+      <section className="py-24 bg-gradient-to-b from-white to-amber-50/50 dark:from-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -94,10 +158,10 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-rose-700 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-rose-700 dark:from-amber-400 dark:to-rose-400 bg-clip-text text-transparent">
               Our Collections
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Discover our handcrafted stone art collections
             </p>
           </motion.div>
@@ -127,9 +191,9 @@ export default function Home() {
                         <category.icon className="h-20 w-20 text-white group-hover:scale-110 transition-transform duration-300 drop-shadow-lg" />
                       </motion.div>
                     </div>
-                    <CardContent className="p-6 bg-white">
-                      <h3 className="text-xl font-bold mb-2 text-gray-900">{category.name}</h3>
-                      <p className="text-gray-600">{category.desc}</p>
+                    <CardContent className="p-6 bg-white dark:bg-gray-800">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{category.name}</h3>
+                      <p className="text-gray-600 dark:text-gray-400">{category.desc}</p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -140,7 +204,7 @@ export default function Home() {
       </section>
 
       {/* Process Section */}
-      <section className="py-24 bg-gradient-to-b from-amber-50/50 to-white">
+      <section className="py-24 bg-gradient-to-b from-amber-50/50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -148,10 +212,10 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-orange-700 bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-orange-700 dark:from-amber-400 dark:to-orange-400 bg-clip-text text-transparent">
               How It Works
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Simple 4-step process to create your custom stone art
             </p>
           </motion.div>
@@ -176,12 +240,12 @@ export default function Home() {
                   <div className="w-24 h-24 bg-gradient-to-br from-amber-600 via-orange-600 to-rose-600 rounded-full flex items-center justify-center mx-auto shadow-xl shadow-amber-500/30">
                     <item.icon className="h-10 w-10 text-white" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-amber-700 font-bold">{item.step}</span>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-amber-700 dark:text-amber-400 font-bold">{item.step}</span>
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-2 text-gray-900">{item.title}</h3>
-                <p className="text-gray-600">{item.desc}</p>
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -189,7 +253,7 @@ export default function Home() {
       </section>
 
       {/* Trust Features */}
-      <section className="py-24 bg-gradient-to-b from-white to-amber-50/30">
+      <section className="py-24 bg-gradient-to-b from-white to-amber-50/30 dark:from-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
@@ -210,69 +274,16 @@ export default function Home() {
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-${feature.color.split('-')[1]}-500/30`}>
                   <feature.icon className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-lg font-bold mb-2 text-gray-900">{feature.title}</h3>
-                <p className="text-gray-600">{feature.desc}</p>
+                <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">{feature.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{feature.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-24 bg-gradient-to-b from-amber-50/30 to-white">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-rose-700 bg-clip-text text-transparent">
-              What Our Customers Say
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Real stories from real customers
-            </p>
-          </motion.div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { name: "Rahul Sharma", location: "Mumbai", rating: 5 },
-              { name: "Priya Patel", location: "Delhi", rating: 5 },
-              { name: "Amit Kumar", location: "Bangalore", rating: 5 },
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-                whileHover={{ y: -8 }}
-              >
-                <Card className="p-8 hover:shadow-2xl transition-all duration-500 border-0 shadow-lg bg-gradient-to-br from-white to-amber-50/30">
-                  <div className="flex items-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-amber-500 text-amber-500" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    "Absolutely stunning! The stone art exceeded my expectations. My wife cried when she saw our wedding photo on the stone. Perfect anniversary gift!"
-                  </p>
-                  <div className="flex items-center">
-                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full mr-4 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                      {testimonial.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{testimonial.name}</p>
-                      <p className="text-sm text-gray-600">{testimonial.location}</p>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Trust Badges Component */}
+      <TrustBadges />
 
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-r from-amber-700 via-orange-600 to-rose-700 relative overflow-hidden">

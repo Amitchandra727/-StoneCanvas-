@@ -17,6 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/collection`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/categories`,
       lastModified: new Date(),
       changeFrequency: "weekly",
@@ -29,16 +35,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/cart`,
+      url: `${baseUrl}/contact`,
       lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.6,
+      changeFrequency: "monthly",
+      priority: 0.5,
     },
     {
       url: `${baseUrl}/account`,
       lastModified: new Date(),
       changeFrequency: "daily",
-      priority: 0.5,
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/auth`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
   ]
 }

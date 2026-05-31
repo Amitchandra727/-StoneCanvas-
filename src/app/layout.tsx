@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LiveChat from "@/components/features/live-chat";
 import ThemeProvider from "@/components/providers/theme-provider";
+import WhatsAppButton from "@/components/features/whatsapp-button";
+import MobileNav from "@/components/layout/mobile-nav";
 import { metadata } from "./metadata";
 
 export { metadata };
@@ -28,6 +30,8 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <LiveChat />
+          <WhatsAppButton />
+          <MobileNav />
         </ThemeProvider>
       </body>
     </html>

@@ -11,13 +11,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
-import { Upload, Sparkles, Image as ImageIcon, Type, Palette, Box, Gift, ShoppingCart, Eye, RotateCcw } from "lucide-react"
+import { Upload, Sparkles, Image as ImageIcon, Type, Palette, Box, Gift, ShoppingCart, Eye, RotateCcw, ZoomIn, ZoomOut, RotateCw, Calendar, MessageSquare, CheckCircle } from "lucide-react"
 import { useCartStore } from "@/stores/cart-store"
+
+const Textarea = ({ className, ...props }: any) => (
+  <textarea
+    className={`flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className || ''}`}
+    {...props}
+  />
+)
 
 export default function CustomizePage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [customText, setCustomText] = useState("")
   const [customNames, setCustomNames] = useState("")
+  const [customDate, setCustomDate] = useState("")
+  const [customMessage, setCustomMessage] = useState("")
   const [selectedShape, setSelectedShape] = useState("round")
   const [selectedSize, setSelectedSize] = useState("medium")
   const [selectedFont, setSelectedFont] = useState("serif")
@@ -25,6 +34,9 @@ export default function CustomizePage() {
   const [selectedPackaging, setSelectedPackaging] = useState("standard")
   const [fontSize, setFontSize] = useState([24])
   const [textColor, setTextColor] = useState("#000000")
+  const [imageScale, setImageScale] = useState(100)
+  const [imageRotation, setImageRotation] = useState(0)
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 })
 
   const addItem = useCartStore((state: any) => state.addItem)
 
@@ -37,10 +49,10 @@ export default function CustomizePage() {
   ]
 
   const sizes = [
-    { id: "small", name: "Small (3 inch)", price: 499 },
-    { id: "medium", name: "Medium (4 inch)", price: 699 },
-    { id: "large", name: "Large (5 inch)", price: 899 },
-    { id: "xlarge", name: "Extra Large (6 inch)", price: 1199 },
+    { id: "small", name: "Small (3 inch)", price: 499, delivery: 4 },
+    { id: "medium", name: "Medium (4 inch)", price: 699, delivery: 5 },
+    { id: "large", name: "Large (5 inch)", price: 899, delivery: 6 },
+    { id: "xlarge", name: "Extra Large (6 inch)", price: 1199, delivery: 7 },
   ]
 
   const fonts = [
@@ -69,6 +81,13 @@ export default function CustomizePage() {
     const framePrice = frames.find((f) => f.id === selectedFrame)?.price || 0
     const packagingPrice = packaging.find((p) => p.id === selectedPackaging)?.price || 0
     return basePrice + shapePrice + framePrice + packagingPrice
+  }
+
+  const getDeliveryDate = () => {
+    const deliveryDays = sizes.find((s) => s.id === selectedSize)?.delivery || 5
+    const date = new Date()
+    date.setDate(date.getDate() + deliveryDays)
+    return date.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,6 +121,8 @@ export default function CustomizePage() {
     setUploadedImage(null)
     setCustomText("")
     setCustomNames("")
+    setCustomDate("")
+    setCustomMessage("")
     setSelectedShape("round")
     setSelectedSize("medium")
     setSelectedFont("serif")
@@ -109,10 +130,13 @@ export default function CustomizePage() {
     setSelectedPackaging("standard")
     setFontSize([24])
     setTextColor("#000000")
+    setImageScale(100)
+    setImageRotation(0)
+    setImagePosition({ x: 0, y: 0 })
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       
       <div className="container mx-auto px-4 py-12">
@@ -121,10 +145,10 @@ export default function CustomizePage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-amber-900 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 to-amber-900 dark:from-amber-400 dark:to-amber-600 bg-clip-text text-transparent">
             Customize Your Stone Art
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-300">
             Create a unique, personalized gift that will be treasured forever
           </p>
         </motion.div>
@@ -136,27 +160,32 @@ export default function CustomizePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="sticky top-24">
+            <Card className="sticky top-24 dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold flex items-center">
-                    <Eye className="mr-2 h-5 w-5" />
+                  <h3 className="text-xl font-semibold flex items-center text-gray-900 dark:text-white">
+                    <Eye className="mr-2 h-5 w-5 text-amber-600" />
                     Live Preview
                   </h3>
-                  <Button variant="ghost" size="sm" onClick={resetCustomization}>
+                  <Button variant="ghost" size="sm" onClick={resetCustomization} className="dark:text-gray-300">
                     <RotateCcw className="mr-2 h-4 w-4" />
                     Reset
                   </Button>
                 </div>
                 
                 {/* Stone Preview */}
-                <div className="relative aspect-square bg-gradient-to-br from-stone-200 to-stone-300 rounded-3xl flex items-center justify-center p-8 shadow-2xl overflow-hidden">
+                <div className="relative aspect-square bg-gradient-to-br from-stone-200 to-stone-300 dark:from-gray-700 dark:to-gray-600 rounded-3xl flex items-center justify-center p-8 shadow-2xl overflow-hidden">
                   {/* Stone Texture */}
                   <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNjY2MiLz4KPC9zdmc+')]"></div>
                   
-                  {/* Uploaded Image */}
+                  {/* Uploaded Image with Transformations */}
                   {uploadedImage && (
-                    <div className="relative z-10 w-full h-full flex items-center justify-center">
+                    <div 
+                      className="relative z-10 w-full h-full flex items-center justify-center transition-transform duration-300"
+                      style={{
+                        transform: `scale(${imageScale / 100}) rotate(${imageRotation}deg) translate(${imagePosition.x}px, ${imagePosition.y}px)`
+                      }}
+                    >
                       <img
                         src={uploadedImage}
                         alt="Uploaded"
@@ -169,7 +198,7 @@ export default function CustomizePage() {
                   {customText && (
                     <div className="absolute bottom-8 left-0 right-0 text-center z-20">
                       <p
-                        className={`${fonts.find((f) => f.id === selectedFont)?.class} font-bold`}
+                        className={`${fonts.find((f) => f.id === selectedFont)?.class} font-bold text-gray-900 dark:text-white`}
                         style={{ fontSize: `${fontSize[0]}px`, color: textColor }}
                       >
                         {customText}
@@ -181,30 +210,79 @@ export default function CustomizePage() {
                   {customNames && (
                     <div className="absolute top-8 left-0 right-0 text-center z-20">
                       <p
-                        className={`${fonts.find((f) => f.id === selectedFont)?.class} font-semibold`}
+                        className={`${fonts.find((f) => f.id === selectedFont)?.class} font-semibold text-gray-900 dark:text-white`}
                         style={{ fontSize: `${fontSize[0] * 0.8}px`, color: textColor }}
                       >
                         {customNames}
                       </p>
                     </div>
                   )}
+
+                  {/* Custom Date */}
+                  {customDate && (
+                    <div className="absolute top-1/4 left-0 right-0 text-center z-20">
+                      <p
+                        className={`${fonts.find((f) => f.id === selectedFont)?.class} font-medium text-gray-700 dark:text-gray-300`}
+                        style={{ fontSize: `${fontSize[0] * 0.6}px`, color: textColor }}
+                      >
+                        {customDate}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Custom Message */}
+                  {customMessage && (
+                    <div className="absolute bottom-1/4 left-0 right-0 text-center z-20 px-4">
+                      <p
+                        className={`${fonts.find((f) => f.id === selectedFont)?.class} text-sm text-gray-700 dark:text-gray-300`}
+                        style={{ color: textColor }}
+                      >
+                        {customMessage}
+                      </p>
+                    </div>
+                  )}
                   
                   {/* Placeholder when no image */}
-                  {!uploadedImage && !customText && !customNames && (
+                  {!uploadedImage && !customText && !customNames && !customDate && !customMessage && (
                     <div className="text-center z-10">
                       <ImageIcon className="h-16 w-16 text-stone-400 mx-auto mb-4" />
-                      <p className="text-stone-500">Upload an image to see preview</p>
+                      <p className="text-stone-500 dark:text-gray-400">Upload an image to see preview</p>
                     </div>
                   )}
                 </div>
 
+                {/* Image Controls */}
+                {uploadedImage && (
+                  <div className="mt-4 p-4 bg-amber-50 dark:bg-gray-700 rounded-lg">
+                    <Label className="text-sm font-semibold mb-3 block text-gray-900 dark:text-white">Image Adjustments</Label>
+                    <div className="flex gap-2 mb-3">
+                      <Button variant="outline" size="icon" onClick={() => setImageScale(Math.max(50, imageScale - 10))}>
+                        <ZoomOut className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={() => setImageScale(Math.min(200, imageScale + 10))}>
+                        <ZoomIn className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={() => setImageRotation((imageRotation + 90) % 360)}>
+                        <RotateCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">
+                      Scale: {imageScale}% | Rotation: {imageRotation}°
+                    </div>
+                  </div>
+                )}
+
                 {/* Price Display */}
-                <div className="mt-6 p-4 bg-amber-50 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">Total Price</span>
-                    <span className="text-2xl font-bold text-amber-700">
+                <div className="mt-6 p-4 bg-amber-50 dark:bg-gray-700 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Price</span>
+                    <span className="text-2xl font-bold text-amber-700 dark:text-amber-400">
                       ₹{calculatePrice()}
                     </span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Estimated Delivery: {getDeliveryDate()}
                   </div>
                 </div>
 
@@ -227,21 +305,22 @@ export default function CustomizePage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Card>
+            <Card className="dark:bg-gray-800">
               <CardContent className="p-6">
                 <Tabs defaultValue="image" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="image">Image</TabsTrigger>
                     <TabsTrigger value="text">Text</TabsTrigger>
                     <TabsTrigger value="style">Style</TabsTrigger>
                     <TabsTrigger value="extras">Extras</TabsTrigger>
+                    <TabsTrigger value="message">Message</TabsTrigger>
                   </TabsList>
 
                   {/* Image Tab */}
                   <TabsContent value="image" className="space-y-6">
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Upload Your Photo</Label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-amber-500 transition-colors cursor-pointer">
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Upload Your Photo</Label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-amber-500 dark:hover:border-amber-400 transition-colors cursor-pointer">
                         <input
                           type="file"
                           accept="image/*"
@@ -251,7 +330,7 @@ export default function CustomizePage() {
                         />
                         <label htmlFor="image-upload" className="cursor-pointer">
                           <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 mb-2">Click to upload or drag and drop</p>
+                          <p className="text-gray-600 dark:text-gray-300 mb-2">Click to upload or drag and drop</p>
                           <p className="text-sm text-gray-400">PNG, JPG up to 10MB</p>
                         </label>
                       </div>
@@ -272,6 +351,10 @@ export default function CustomizePage() {
                         >
                           Remove
                         </Button>
+                        <div className="absolute bottom-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-xs flex items-center">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Uploaded
+                        </div>
                       </div>
                     )}
                   </TabsContent>
@@ -279,31 +362,43 @@ export default function CustomizePage() {
                   {/* Text Tab */}
                   <TabsContent value="text" className="space-y-6">
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Custom Text</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Custom Text</Label>
                       <Input
                         placeholder="Enter your custom text"
                         value={customText}
                         onChange={(e) => setCustomText(e.target.value)}
                         maxLength={50}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
-                      <p className="text-sm text-gray-500 mt-1">{customText.length}/50 characters</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{customText.length}/50 characters</p>
                     </div>
 
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Names</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Names</Label>
                       <Input
                         placeholder="Enter names (e.g., Rahul & Priya)"
                         value={customNames}
                         onChange={(e) => setCustomNames(e.target.value)}
                         maxLength={30}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
-                      <p className="text-sm text-gray-500 mt-1">{customNames.length}/30 characters</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{customNames.length}/30 characters</p>
                     </div>
 
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Font Style</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Date</Label>
+                      <Input
+                        type="date"
+                        value={customDate}
+                        onChange={(e) => setCustomDate(e.target.value)}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Font Style</Label>
                       <Select value={selectedFont} onValueChange={setSelectedFont}>
-                        <SelectTrigger>
+                        <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -317,7 +412,7 @@ export default function CustomizePage() {
                     </div>
 
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Font Size: {fontSize[0]}px</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Font Size: {fontSize[0]}px</Label>
                       <Slider
                         value={fontSize}
                         onValueChange={setFontSize}
@@ -329,14 +424,14 @@ export default function CustomizePage() {
                     </div>
 
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Text Color</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Text Color</Label>
                       <div className="flex gap-2">
                         {["#000000", "#FFFFFF", "#8B4513", "#D2691E", "#FFD700", "#4A4A4A"].map((color) => (
                           <button
                             key={color}
                             onClick={() => setTextColor(color)}
                             className={`w-10 h-10 rounded-full border-2 ${
-                              textColor === color ? "border-amber-500" : "border-gray-300"
+                              textColor === color ? "border-amber-500" : "border-gray-300 dark:border-gray-600"
                             }`}
                             style={{ backgroundColor: color }}
                           />
@@ -345,10 +440,26 @@ export default function CustomizePage() {
                     </div>
                   </TabsContent>
 
+                  {/* Message Tab */}
+                  <TabsContent value="message" className="space-y-6">
+                    <div>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Custom Message</Label>
+                      <Textarea
+                        placeholder="Add a special message (optional)"
+                        value={customMessage}
+                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCustomMessage(e.target.value)}
+                        maxLength={100}
+                        rows={4}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{customMessage.length}/100 characters</p>
+                    </div>
+                  </TabsContent>
+
                   {/* Style Tab */}
                   <TabsContent value="style" className="space-y-6">
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Stone Shape</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Stone Shape</Label>
                       <div className="grid grid-cols-3 gap-3">
                         {shapes.map((shape) => (
                           <button
@@ -356,16 +467,16 @@ export default function CustomizePage() {
                             onClick={() => setSelectedShape(shape.id)}
                             className={`p-4 border-2 rounded-lg text-center transition-all ${
                               selectedShape === shape.id
-                                ? "border-amber-500 bg-amber-50"
-                                : "border-gray-200 hover:border-amber-300"
+                                ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-400"
+                                : "border-gray-200 dark:border-gray-600 hover:border-amber-300 dark:hover:border-amber-500"
                             }`}
                           >
                             <div className="text-2xl mb-1">
                               {shape.id === "round" ? "⭕" : shape.id === "heart" ? "❤️" : shape.id === "oval" ? "🔵" : shape.id === "square" ? "⬜" : "▭"}
                             </div>
-                            <p className="text-sm font-medium">{shape.name}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{shape.name}</p>
                             {shape.price > 0 && (
-                              <p className="text-xs text-amber-700">+₹{shape.price}</p>
+                              <p className="text-xs text-amber-700 dark:text-amber-400">+₹{shape.price}</p>
                             )}
                           </button>
                         ))}
@@ -373,9 +484,9 @@ export default function CustomizePage() {
                     </div>
 
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Stone Size</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Stone Size</Label>
                       <Select value={selectedSize} onValueChange={setSelectedSize}>
-                        <SelectTrigger>
+                        <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -392,9 +503,9 @@ export default function CustomizePage() {
                   {/* Extras Tab */}
                   <TabsContent value="extras" className="space-y-6">
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Frame / Stand</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Frame / Stand</Label>
                       <Select value={selectedFrame} onValueChange={setSelectedFrame}>
-                        <SelectTrigger>
+                        <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -408,9 +519,9 @@ export default function CustomizePage() {
                     </div>
 
                     <div>
-                      <Label className="text-base font-semibold mb-2 block">Gift Packaging</Label>
+                      <Label className="text-base font-semibold mb-2 block text-gray-900 dark:text-white">Gift Packaging</Label>
                       <Select value={selectedPackaging} onValueChange={setSelectedPackaging}>
-                        <SelectTrigger>
+                        <SelectTrigger className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

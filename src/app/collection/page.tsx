@@ -1,94 +1,60 @@
 "use client"
 
+import { useState } from "react"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { Heart, Star, ShoppingCart, Filter, Grid, Heart as HeartFilled, Sparkles } from "lucide-react"
+import { Heart, Star, ShoppingCart, Filter, Grid, Heart as HeartFilled, Sparkles, Eye, ShoppingCart as CartFilled, X, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import { useCartStore } from "@/stores/cart-store"
 import { useWishlistStore } from "@/stores/wishlist-store"
-
-const products = [
-  {
-    id: "1",
-    productId: "prod-1",
-    name: "Romantic Couple Stone",
-    price: 699,
-    originalPrice: 899,
-    rating: 4.8,
-    reviews: 124,
-    bestseller: true,
-    category: "Couple Stones",
-    color: "from-pink-500 to-rose-500",
-  },
-  {
-    id: "2",
-    productId: "prod-2",
-    name: "Divine Ganesh Stone",
-    price: 899,
-    originalPrice: 1099,
-    rating: 4.9,
-    reviews: 89,
-    bestseller: true,
-    category: "God Stone Art",
-    color: "from-amber-500 to-orange-500",
-  },
-  {
-    id: "3",
-    productId: "prod-3",
-    name: "Wedding Anniversary Gift",
-    price: 999,
-    originalPrice: 1299,
-    rating: 4.7,
-    reviews: 67,
-    bestseller: false,
-    category: "Wedding Gifts",
-    color: "from-purple-500 to-indigo-500",
-  },
-  {
-    id: "4",
-    productId: "prod-4",
-    name: "Memorial Stone Pet",
-    price: 599,
-    originalPrice: 799,
-    rating: 4.9,
-    reviews: 156,
-    bestseller: true,
-    category: "Pet Memorial",
-    color: "from-blue-500 to-cyan-500",
-  },
-  {
-    id: "5",
-    productId: "prod-5",
-    name: "Motivational Desk Stone",
-    price: 499,
-    originalPrice: 699,
-    rating: 4.8,
-    reviews: 92,
-    bestseller: false,
-    category: "Desk Stones",
-    color: "from-green-500 to-emerald-500",
-  },
-  {
-    id: "6",
-    productId: "prod-6",
-    name: "Home Decor Stone Art",
-    price: 799,
-    originalPrice: 999,
-    rating: 4.7,
-    reviews: 78,
-    bestseller: false,
-    category: "Home Decor",
-    color: "from-rose-500 to-red-500",
-  },
-]
+import { products } from "@/lib/products"
+import Image from "next/image"
+import { Slider } from "@/components/ui/slider"
 
 export default function CollectionPage() {
   const addItem = useCartStore((state) => state.addItem)
   const addItemToWishlist = useWishlistStore((state) => state.addItem)
+  const removeItemFromWishlist = useWishlistStore((state) => state.removeItem)
   const isInWishlist = useWishlistStore((state) => state.isInWishlist)
+  const cartItems = useCartStore((state) => state.items)
+
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [priceRange, setPriceRange] = useState([2000])
+  const [sortBy, setSortBy] = useState("featured")
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
+
+  const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))]
+
+  const filteredProducts = products
+    .filter(product => {
+      if (selectedCategory !== "all" && product.category !== selectedCategory) return false
+      if (product.price > priceRange[0]) return false
+      return true
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "price-low":
+          return a.price - b.price
+        case "price-high":
+          return b.price - a.price
+        case "rating":
+          return b.rating - a.rating
+        case "featured":
+        default:
+          return (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0)
+      }
+    })
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
 
   const handleAddToCart = (product: any) => {
     addItem({
@@ -96,21 +62,39 @@ export default function CollectionPage() {
       productId: product.productId,
       quantity: 1,
       price: product.price,
-      customImage: undefined,
+      name: product.name,
+      image: product.image,
     })
   }
 
-  const handleAddToWishlist = (product: any) => {
-    addItemToWishlist({
-      id: Date.now().toString(),
-      productId: product.productId,
-      name: product.name,
-      price: product.price,
-      category: product.category,
-    })
+  const handleToggleWishlist = (product: any) => {
+    if (isInWishlist(product.productId)) {
+      removeItemFromWishlist(product.productId)
+    } else {
+      addItemToWishlist({
+        id: Date.now().toString(),
+        productId: product.productId,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        image: product.image,
+      })
+    }
   }
+
+  const isInCart = (productId: string) => {
+    return cartItems.some((item) => item.productId === productId)
+  }
+
+  const resetFilters = () => {
+    setSelectedCategory("all")
+    setPriceRange([2000])
+    setSortBy("featured")
+    setCurrentPage(1)
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:bg-gray-900">
       <Navbar />
       
       <div className="container mx-auto px-4 py-12">
@@ -119,108 +103,233 @@ export default function CollectionPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 via-orange-600 to-rose-700 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-700 via-orange-600 to-rose-700 dark:from-amber-400 dark:via-orange-400 dark:to-rose-400 bg-clip-text text-transparent">
             Our Collection
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Explore our complete range of personalized stone art products
           </p>
         </motion.div>
 
-        {/* Filters */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
+        {/* Filters Bar */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
+          <div className="flex gap-2 w-full md:w-auto">
+            <Button 
+              variant={showFilters ? "default" : "outline"} 
+              size="sm" 
+              className="shadow-md hover:shadow-lg transition-shadow"
+              onClick={() => setShowFilters(!showFilters)}
+            >
               <Filter className="mr-2 h-4 w-4" />
               Filters
+              {showFilters && <X className="ml-2 h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
-              <Grid className="mr-2 h-4 w-4" />
-              Sort
-            </Button>
+            <div className="relative">
+              <Button variant="outline" size="sm" className="shadow-md hover:shadow-lg transition-shadow">
+                <Grid className="mr-2 h-4 w-4" />
+                Sort
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              >
+                <option value="featured">Featured</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
+              </select>
+            </div>
+            {(selectedCategory !== "all" || priceRange[0] < 2000) && (
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
+                <X className="mr-2 h-4 w-4" />
+                Clear
+              </Button>
+            )}
           </div>
-          <p className="text-gray-600 font-medium">Showing {products.length} products</p>
+          <p className="text-gray-600 dark:text-gray-300 font-medium">
+            Showing {paginatedProducts.length} of {filteredProducts.length} products
+          </p>
         </div>
 
+        {/* Filter Panel */}
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-6 mb-8 shadow-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Category Filter */}
+              <div>
+                <h3 className="font-semibold mb-3 text-gray-900 dark:text-white">Category</h3>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        selectedCategory === category
+                          ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Range Filter */}
+              <div>
+                <h3 className="font-semibold mb-3 text-gray-900 dark:text-white">Price Range</h3>
+                <div className="px-2">
+                  <Slider
+                    value={priceRange}
+                    onValueChange={setPriceRange}
+                    max={2000}
+                    min={499}
+                    step={50}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    <span>₹499</span>
+                    <span>₹{priceRange[0]}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bestseller Filter */}
+              <div>
+                <h3 className="font-semibold mb-3 text-gray-900 dark:text-white">Quick Filters</h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => {
+                      const bestsellers = products.filter(p => p.bestseller)
+                      setSelectedCategory(bestsellers.length > 0 ? products.find(p => p.bestseller)?.category || "all" : "all")
+                    }}
+                    className="px-4 py-2 rounded-full text-sm font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-all"
+                  >
+                    ⭐ Bestsellers
+                  </button>
+                  <button
+                    onClick={() => setPriceRange([1000])}
+                    className="px-4 py-2 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 transition-all"
+                  >
+                    💰 Under ₹1000
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {paginatedProducts.map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
               whileHover={{ y: -8 }}
             >
-              <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 shadow-lg group">
+              <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 shadow-lg group bg-white dark:bg-gray-800">
                 <div className="relative">
-                  <div className={`aspect-square bg-gradient-to-br ${product.color} flex items-center justify-center relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors" />
+                  <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-200/50 via-orange-200/50 to-rose-200/50 dark:from-amber-900/30 dark:via-orange-900/30 dark:to-rose-900/30" />
                     <motion.div
                       animate={{ rotate: [0, 5, -5, 0] }}
                       transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
+                      className="relative z-10"
                     >
-                      <Heart className="h-24 w-24 text-white/80 group-hover:scale-110 transition-transform drop-shadow-lg" />
+                      <Heart className="h-24 w-24 text-amber-600/60 dark:text-amber-400/60 group-hover:scale-110 transition-transform drop-shadow-lg" />
                     </motion.div>
+                    {/* Quick Actions */}
+                    <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
+                        onClick={() => handleToggleWishlist(product)}
+                      >
+                        {isInWishlist(product.productId) ? (
+                          <HeartFilled className="h-4 w-4 text-rose-500" />
+                        ) : (
+                          <Heart className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   {product.bestseller && (
-                    <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg">
+                    <div className="absolute top-4 left-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
                       Bestseller
                     </div>
                   )}
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-bold text-rose-600 shadow-lg">
-                    -{Math.round((1 - product.price / product.originalPrice) * 100)}%
+                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold text-rose-600 shadow-lg">
+                    -{Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
                   </div>
                 </div>
-                <CardContent className="p-6 bg-white">
-                  <p className="text-sm font-semibold text-amber-700 mb-2">{product.category}</p>
-                  <h3 className="text-lg font-bold mb-3 text-gray-900">{product.name}</h3>
+                <CardContent className="p-5">
+                  <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2 uppercase tracking-wide">
+                    {product.category}
+                  </p>
+                  <h3 className="text-base font-bold mb-2 text-gray-900 dark:text-white line-clamp-2">
+                    {product.name}
+                  </h3>
                   <div className="flex items-center mb-3">
                     <div className="flex items-center">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-4 w-4 ${
+                          className={`h-3.5 w-3.5 ${
                             i < Math.floor(product.rating)
                               ? "fill-amber-500 text-amber-500"
-                              : "text-gray-300"
+                              : "text-gray-300 dark:text-gray-600"
                           }`}
                         />
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600 ml-2">
+                    <span className="text-xs text-gray-600 dark:text-gray-400 ml-2">
                       {product.rating} ({product.reviews})
                     </span>
                   </div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <span className="text-2xl font-bold text-amber-700">₹{product.price}</span>
+                      <span className="text-xl font-bold text-amber-700 dark:text-amber-400">₹{product.price}</span>
                       <span className="text-sm text-gray-400 line-through ml-2">₹{product.originalPrice}</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleAddToWishlist(product)}
-                      className={isInWishlist(product.productId) ? "text-rose-500 border-rose-500 hover:bg-rose-50" : "hover:bg-rose-50"}
+                      variant="luxury"
+                      className="flex-1 shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-shadow text-sm"
+                      onClick={() => handleAddToCart(product)}
+                      disabled={isInCart(product.productId)}
                     >
-                      {isInWishlist(product.productId) ? (
-                        <HeartFilled className="h-4 w-4" />
+                      {isInCart(product.productId) ? (
+                        <>
+                          <CartFilled className="mr-2 h-4 w-4" />
+                          Added
+                        </>
                       ) : (
-                        <Heart className="h-4 w-4" />
+                        <>
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Add
+                        </>
                       )}
                     </Button>
-                    <Button
-                      variant="luxury"
-                      className="flex-1 shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-shadow"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      Add to Cart
-                    </Button>
                     <Link href="/customize" className="flex-1">
-                      <Button variant="outline" className="w-full hover:bg-amber-50">
+                      <Button variant="outline" className="w-full hover:bg-amber-50 dark:hover:bg-gray-700 text-sm">
                         <Sparkles className="mr-2 h-4 w-4" />
                         Customize
                       </Button>
@@ -231,6 +340,39 @@ export default function CollectionPage() {
             </motion.div>
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-12">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className={currentPage === page ? "bg-gradient-to-r from-amber-600 to-orange-600" : ""}
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
 
       <Footer />

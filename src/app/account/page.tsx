@@ -7,17 +7,27 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
-import { User, ShoppingBag, Heart, MapPin, Settings, Package, Clock, CheckCircle, XCircle } from "lucide-react"
+import { User, ShoppingBag, Heart, MapPin, Settings, Package, Clock, CheckCircle, XCircle, LogOut, ArrowRight } from "lucide-react"
 import { useCartStore } from "@/stores/cart-store"
 import { useWishlistStore } from "@/stores/wishlist-store"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function AccountPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("orders")
   const cartItems = useCartStore((state) => state.items)
   const wishlistItems = useWishlistStore((state) => state.items)
   const clearCart = useCartStore((state) => state.clearCart)
   const clearWishlist = useWishlistStore((state) => state.clearWishlist)
+
+  // Check if user is logged in
+  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null
+
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    router.push('/')
+  }
 
   // Mock orders data
   const orders = [
@@ -47,15 +57,15 @@ export default function AccountPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "DELIVERED":
-        return "text-green-600 bg-green-100"
+        return "text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400"
       case "PROCESSING":
-        return "text-blue-600 bg-blue-100"
+        return "text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400"
       case "SHIPPED":
-        return "text-amber-600 bg-amber-100"
+        return "text-amber-600 bg-amber-100 dark:bg-amber-900/20 dark:text-amber-400"
       case "CANCELLED":
-        return "text-red-600 bg-red-100"
+        return "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400"
       default:
-        return "text-gray-600 bg-gray-100"
+        return "text-gray-600 bg-gray-100 dark:bg-gray-700 dark:text-gray-300"
     }
   }
 
@@ -70,8 +80,39 @@ export default function AccountPage() {
     }
   }
 
+  // If not logged in, redirect to auth page
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 dark:from-gray-900 dark:to-gray-800">
+        <Navbar />
+        <div className="container mx-auto px-4 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-md mx-auto text-center"
+          >
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full mb-6">
+              <User className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white">Sign In Required</h1>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">
+              Please sign in to access your account
+            </p>
+            <Link href="/auth">
+              <Button variant="luxury" size="lg">
+                Sign In
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       
       <div className="container mx-auto px-4 py-12">
@@ -80,22 +121,22 @@ export default function AccountPage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold mb-2 text-gray-900">My Account</h1>
-          <p className="text-gray-600">Manage your orders, wishlist, and account settings</p>
+          <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">My Account</h1>
+          <p className="text-gray-600 dark:text-gray-300">Manage your orders, wishlist, and account settings</p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <Card>
+            <Card className="dark:bg-gray-800">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4 mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
                     <User className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">John Doe</h3>
-                    <p className="text-sm text-gray-600">john@example.com</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{user.name || "User"}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
                   </div>
                 </div>
 
@@ -132,6 +173,14 @@ export default function AccountPage() {
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </Button>
                 </nav>
               </CardContent>
             </Card>
@@ -156,12 +205,12 @@ export default function AccountPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card>
+                    <Card className="dark:bg-gray-800">
                       <CardContent className="p-6">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-4 mb-2">
-                              <h3 className="font-semibold">Order #{order.id}</h3>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">Order #{order.id}</h3>
                               <span
                                 className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(order.status)}`}
                               >
@@ -169,14 +218,14 @@ export default function AccountPage() {
                                 {order.status}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                               Placed on {new Date(order.date).toLocaleDateString("en-IN", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
                               })}
                             </p>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
                               {order.items} {order.items === 1 ? "item" : "items"} • Total: ₹{order.total}
                             </p>
                           </div>
@@ -191,11 +240,11 @@ export default function AccountPage() {
               {/* Wishlist Tab */}
               <TabsContent value="wishlist">
                 {wishlistItems.length === 0 ? (
-                  <Card>
+                  <Card className="dark:bg-gray-800">
                     <CardContent className="p-12 text-center">
                       <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
-                      <p className="text-gray-600 mb-6">
+                      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Your wishlist is empty</h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-6">
                         Save your favorite items for later
                       </p>
                       <Link href="/collection">
@@ -206,12 +255,12 @@ export default function AccountPage() {
                 ) : (
                   <div className="space-y-4">
                     {wishlistItems.map((item) => (
-                      <Card key={item.id}>
+                      <Card key={item.id} className="dark:bg-gray-800">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h4 className="font-semibold">{item.name}</h4>
-                              <p className="text-sm text-gray-600">₹{item.price}</p>
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{item.name}</h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">₹{item.price}</p>
                             </div>
                             <Button variant="outline" size="sm">Move to Cart</Button>
                           </div>
@@ -227,21 +276,21 @@ export default function AccountPage() {
 
               {/* Addresses Tab */}
               <TabsContent value="addresses">
-                <Card>
+                <Card className="dark:bg-gray-800">
                   <CardHeader>
-                    <CardTitle>Saved Addresses</CardTitle>
+                    <CardTitle className="text-gray-900 dark:text-white">Saved Addresses</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="p-4 border rounded-lg">
+                    <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-amber-700" />
-                          <span className="font-semibold">Home</span>
-                          <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded">Default</span>
+                          <MapPin className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+                          <span className="font-semibold text-gray-900 dark:text-white">Home</span>
+                          <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-1 rounded">Default</span>
                         </div>
                         <Button variant="ghost" size="sm">Edit</Button>
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         John Doe<br />
                         +91 98765 43210<br />
                         123 Main Street, Apartment 4B<br />
@@ -258,33 +307,33 @@ export default function AccountPage() {
 
               {/* Settings Tab */}
               <TabsContent value="settings">
-                <Card>
+                <Card className="dark:bg-gray-800">
                   <CardHeader>
-                    <CardTitle>Account Settings</CardTitle>
+                    <CardTitle className="text-gray-900 dark:text-white">Account Settings</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Full Name</label>
+                      <label className="text-sm font-medium mb-2 block text-gray-900 dark:text-white">Full Name</label>
                       <input
                         type="text"
-                        defaultValue="John Doe"
-                        className="w-full px-3 py-2 border rounded-md"
+                        defaultValue={user.name || "John Doe"}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Email</label>
+                      <label className="text-sm font-medium mb-2 block text-gray-900 dark:text-white">Email</label>
                       <input
                         type="email"
-                        defaultValue="john@example.com"
-                        className="w-full px-3 py-2 border rounded-md"
+                        defaultValue={user.email || "john@example.com"}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Phone</label>
+                      <label className="text-sm font-medium mb-2 block text-gray-900 dark:text-white">Phone</label>
                       <input
                         type="tel"
                         defaultValue="+91 98765 43210"
-                        className="w-full px-3 py-2 border rounded-md"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-700 dark:text-white"
                       />
                     </div>
                     <Button variant="luxury">Save Changes</Button>
