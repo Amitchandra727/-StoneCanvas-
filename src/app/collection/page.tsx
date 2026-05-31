@@ -239,14 +239,13 @@ export default function CollectionPage() {
               <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 border-0 shadow-lg group bg-white dark:bg-gray-800">
                 <div className="relative">
                   <div className="aspect-square bg-gradient-to-br from-stone-100 to-stone-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-200/50 via-orange-200/50 to-rose-200/50 dark:from-amber-900/30 dark:via-orange-900/30 dark:to-rose-900/30" />
-                    <motion.div
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
-                      className="relative z-10"
-                    >
-                      <Heart className="h-24 w-24 text-amber-600/60 dark:text-amber-400/60 group-hover:scale-110 transition-transform drop-shadow-lg" />
-                    </motion.div>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    />
                     {/* Quick Actions */}
                     <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button

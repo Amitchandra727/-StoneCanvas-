@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
 import { Upload, Sparkles, Image as ImageIcon, Type, Palette, Box, Gift, ShoppingCart, Eye, RotateCcw, ZoomIn, ZoomOut, RotateCw, Calendar, MessageSquare, CheckCircle } from "lucide-react"
 import { useCartStore } from "@/stores/cart-store"
+import Image from "next/image"
 
 const Textarea = ({ className, ...props }: any) => (
   <textarea
@@ -174,9 +175,10 @@ export default function CustomizePage() {
                 </div>
                 
                 {/* Stone Preview */}
-                <div className="relative aspect-square bg-gradient-to-br from-stone-200 to-stone-300 dark:from-gray-700 dark:to-gray-600 rounded-3xl flex items-center justify-center p-8 shadow-2xl overflow-hidden">
-                  {/* Stone Texture */}
-                  <div className="absolute inset-0 opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNjY2MiLz4KPC9zdmc+')]"></div>
+                <div className="relative aspect-square bg-gradient-to-br from-stone-300 to-stone-400 dark:from-gray-600 dark:to-gray-700 rounded-3xl flex items-center justify-center p-8 shadow-2xl overflow-hidden">
+                  {/* Realistic Stone Texture */}
+                  <div className="absolute inset-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&h=800&fit=crop')] bg-cover bg-center"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-stone-200/50 to-stone-300/50 dark:from-gray-700/50 dark:to-gray-800/50"></div>
                   
                   {/* Uploaded Image with Transformations */}
                   {uploadedImage && (
@@ -189,8 +191,22 @@ export default function CustomizePage() {
                       <img
                         src={uploadedImage}
                         alt="Uploaded"
-                        className="max-w-full max-h-full object-contain rounded-lg"
+                        className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                       />
+                    </div>
+                  )}
+                  
+                  {/* Placeholder when no image uploaded */}
+                  {!uploadedImage && (
+                    <div className="relative z-10 text-center">
+                      <Image
+                        src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop"
+                        alt="Sample stone art"
+                        width={200}
+                        height={200}
+                        className="mx-auto rounded-lg shadow-lg opacity-50"
+                      />
+                      <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Upload your photo to see preview</p>
                     </div>
                   )}
                   

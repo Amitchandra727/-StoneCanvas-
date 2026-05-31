@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
 import { Heart, Star, Gift, Sparkles, Award, Truck, Shield, Clock, Gem, Palette, Zap, Users, CheckCircle, MessageSquare } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useEffect, useState } from "react"
 import TrustBadges from "@/components/features/trust-badges"
 
@@ -168,9 +169,30 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: "Couple Stones", icon: Heart, color: "from-pink-500 via-rose-500 to-red-500", link: "/categories/couple", desc: "Celebrate your love" },
-              { name: "God Stone Art", icon: Sparkles, color: "from-amber-500 via-orange-500 to-yellow-500", link: "/categories", desc: "Divine blessings" },
-              { name: "Wedding Gifts", icon: Gift, color: "from-purple-500 via-violet-500 to-indigo-500", link: "/categories", desc: "Perfect for couples" },
+              { 
+                name: "Couple Stones", 
+                icon: Heart, 
+                color: "from-pink-500 via-rose-500 to-red-500", 
+                link: "/categories/couple", 
+                desc: "Celebrate your love",
+                image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop"
+              },
+              { 
+                name: "God Stone Art", 
+                icon: Sparkles, 
+                color: "from-amber-500 via-orange-500 to-yellow-500", 
+                link: "/categories", 
+                desc: "Divine blessings",
+                image: "https://images.unsplash.com/photo-1545989253-02cc26577f88?w=400&h=400&fit=crop"
+              },
+              { 
+                name: "Wedding Gifts", 
+                icon: Gift, 
+                color: "from-purple-500 via-violet-500 to-indigo-500", 
+                link: "/categories", 
+                desc: "Perfect for couples",
+                image: "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop"
+              },
             ].map((category, index) => (
               <motion.div
                 key={category.name}
@@ -182,14 +204,18 @@ export default function Home() {
               >
                 <Link href={category.link}>
                   <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 cursor-pointer group border-0 shadow-lg">
-                    <div className={`h-56 bg-gradient-to-br ${category.color} flex items-center justify-center relative overflow-hidden`}>
-                      <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-colors" />
-                      <motion.div
-                        animate={{ rotate: [0, 5, -5, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, delay: index * 0.5 }}
-                      >
-                        <category.icon className="h-20 w-20 text-white group-hover:scale-110 transition-transform duration-300 drop-shadow-lg" />
-                      </motion.div>
+                    <div className="h-56 relative overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200 dark:from-gray-700 dark:to-gray-600">
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <category.icon className="h-8 w-8 text-white mb-2" />
+                      </div>
                     </div>
                     <CardContent className="p-6 bg-white dark:bg-gray-800">
                       <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{category.name}</h3>
