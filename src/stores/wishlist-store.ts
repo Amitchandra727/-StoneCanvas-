@@ -26,6 +26,7 @@ export const useWishlistStore = create<WishlistStore>()(
       items: [],
       
       addItem: (item) => {
+        console.log('Adding item to wishlist:', item)
         const existingItem = get().items.find((i) => i.productId === item.productId)
         if (!existingItem) {
           set({

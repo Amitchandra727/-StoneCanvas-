@@ -5,12 +5,15 @@ import Footer from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { Heart, Star, ShoppingCart } from "lucide-react"
+import { Heart, Star, ShoppingCart, Heart as HeartFilled } from "lucide-react"
 import Link from "next/link"
+import { useCartStore } from "@/stores/cart-store"
+import { useWishlistStore } from "@/stores/wishlist-store"
 
 const products = [
   {
-    id: 1,
+    id: "1",
+    productId: "prod-1",
     name: "Romantic Couple Stone",
     price: 699,
     originalPrice: 899,
@@ -20,7 +23,8 @@ const products = [
     bestseller: true,
   },
   {
-    id: 2,
+    id: "2",
+    productId: "prod-2",
     name: "Anniversary Special",
     price: 899,
     originalPrice: 1099,
@@ -30,7 +34,8 @@ const products = [
     bestseller: true,
   },
   {
-    id: 3,
+    id: "3",
+    productId: "prod-3",
     name: "Love Birds Stone",
     price: 599,
     originalPrice: 799,
@@ -40,7 +45,8 @@ const products = [
     bestseller: false,
   },
   {
-    id: 4,
+    id: "4",
+    productId: "prod-4",
     name: "Eternal Love Stone",
     price: 999,
     originalPrice: 1299,
@@ -50,7 +56,8 @@ const products = [
     bestseller: true,
   },
   {
-    id: 5,
+    id: "5",
+    productId: "prod-5",
     name: "Couple Portrait Stone",
     price: 1199,
     originalPrice: 1499,
@@ -60,7 +67,8 @@ const products = [
     bestseller: false,
   },
   {
-    id: 6,
+    id: "6",
+    productId: "prod-6",
     name: "Wedding Memory Stone",
     price: 799,
     originalPrice: 999,
@@ -72,6 +80,28 @@ const products = [
 ]
 
 export default function CoupleCategoryPage() {
+  const addItem = useCartStore((state) => state.addItem)
+  const addItemToWishlist = useWishlistStore((state) => state.addItem)
+  const isInWishlist = useWishlistStore((state) => state.isInWishlist)
+
+  const handleAddToCart = (product: any) => {
+    addItem({
+      id: Date.now().toString(),
+      productId: product.productId,
+      quantity: 1,
+      price: product.price,
+      customImage: undefined,
+    })
+  }
+
+  const handleAddToWishlist = (product: any) => {
+    addItemToWishlist({
+      id: Date.now().toString(),
+      productId: product.productId,
+      name: product.name,
+      price: product.price,
+    })
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       <Navbar />
@@ -143,9 +173,28 @@ export default function CoupleCategoryPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleAddToWishlist(product)}
+                      className={isInWishlist(product.productId) ? "text-rose-500" : ""}
+                    >
+                      {isInWishlist(product.productId) ? (
+                        <HeartFilled className="h-4 w-4" />
+                      ) : (
+                        <Heart className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="luxury"
+                      className="flex-1"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Add to Cart
+                    </Button>
                     <Link href="/customize" className="flex-1">
-                      <Button variant="luxury" className="w-full">
-                        <ShoppingCart className="mr-2 h-4 w-4" />
+                      <Button variant="outline" className="w-full">
                         Customize
                       </Button>
                     </Link>

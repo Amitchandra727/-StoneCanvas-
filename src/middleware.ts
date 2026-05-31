@@ -1,24 +1,30 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+// Clerk middleware disabled until authentication is configured
+// import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-const isProtectedRoute = createRouteMatcher([
-  '/account(.*)',
-  '/checkout(.*)',
-  '/admin(.*)',
-])
+// const isProtectedRoute = createRouteMatcher([
+//   '/account(.*)',
+//   '/checkout(.*)',
+//   '/admin(.*)',
+// ])
 
-const isAdminRoute = createRouteMatcher([
-  '/admin(.*)',
-])
+// const isAdminRoute = createRouteMatcher([
+//   '/admin(.*)',
+// ])
 
-export default clerkMiddleware((auth, req) => {
-  if (isAdminRoute(req)) {
-    auth().protect()
-  }
+// export default clerkMiddleware((auth, req) => {
+//   if (isAdminRoute(req)) {
+//     auth().protect((has) => has({ role: 'admin' }))
+//   }
   
-  if (isProtectedRoute(req)) {
-    auth().protect()
-  }
-})
+//   if (isProtectedRoute(req)) {
+//     auth().protect()
+//   }
+// })
+
+export default function middleware(req: Request) {
+  // Middleware disabled - no authentication required
+  return
+}
 
 export const config = {
   matcher: [

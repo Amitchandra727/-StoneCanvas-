@@ -8,9 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { motion } from "framer-motion"
 import { User, ShoppingBag, Heart, MapPin, Settings, Package, Clock, CheckCircle, XCircle } from "lucide-react"
+import { useCartStore } from "@/stores/cart-store"
+import { useWishlistStore } from "@/stores/wishlist-store"
+import Link from "next/link"
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("orders")
+  const cartItems = useCartStore((state) => state.items)
+  const wishlistItems = useWishlistStore((state) => state.items)
+  const clearCart = useCartStore((state) => state.clearCart)
+  const clearWishlist = useWishlistStore((state) => state.clearWishlist)
 
   // Mock orders data
   const orders = [
@@ -183,16 +190,39 @@ export default function AccountPage() {
 
               {/* Wishlist Tab */}
               <TabsContent value="wishlist">
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
-                    <p className="text-gray-600 mb-6">
-                      Save your favorite items for later
-                    </p>
-                    <Button variant="luxury">Explore Collection</Button>
-                  </CardContent>
-                </Card>
+                {wishlistItems.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">Your wishlist is empty</h3>
+                      <p className="text-gray-600 mb-6">
+                        Save your favorite items for later
+                      </p>
+                      <Link href="/collection">
+                        <Button variant="luxury">Explore Collection</Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {wishlistItems.map((item) => (
+                      <Card key={item.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold">{item.name}</h4>
+                              <p className="text-sm text-gray-600">₹{item.price}</p>
+                            </div>
+                            <Button variant="outline" size="sm">Move to Cart</Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    <Button variant="outline" onClick={clearWishlist} className="w-full">
+                      Clear Wishlist
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
 
               {/* Addresses Tab */}
