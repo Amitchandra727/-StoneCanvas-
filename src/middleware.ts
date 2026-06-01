@@ -1,4 +1,5 @@
-// Clerk middleware disabled until authentication is configured
+// Clerk authentication disabled for development
+// Uncomment when Clerk is configured
 // import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 // const isProtectedRoute = createRouteMatcher([
@@ -22,7 +23,7 @@
 // })
 
 export default function middleware(req: Request) {
-  // Middleware disabled - no authentication required
+  // Middleware disabled for development
   return
 }
 

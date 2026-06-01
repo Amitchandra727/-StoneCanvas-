@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
 import { Mail, Phone, MapPin, Send, MessageCircle, CheckCircle } from "lucide-react"
+import { generateGeneralMessage, getWhatsAppPhoneNumber, generateWhatsAppUrl } from "@/lib/whatsapp"
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -27,6 +28,16 @@ export default function ContactPage() {
       setIsSubmitted(false)
       setFormData({ name: "", email: "", phone: "", subject: "", message: "" })
     }, 3000)
+  }
+
+  const handleWhatsAppClick = () => {
+    const phoneNumber = getWhatsAppPhoneNumber()
+    const customMessage = formData.message 
+      ? `Hi, my name is ${formData.name}. ${formData.message}`
+      : "Hi, I have a question about your products."
+    const message = generateGeneralMessage(customMessage)
+    const whatsappUrl = generateWhatsAppUrl(phoneNumber, message)
+    window.open(whatsappUrl, '_blank')
   }
 
   return (
@@ -95,7 +106,11 @@ export default function ContactPage() {
                       <p className="text-amber-100">+91 98765 43210</p>
                     </div>
                   </div>
-                  <Button variant="secondary" className="w-full bg-white text-amber-700 hover:bg-amber-50 shadow-lg">
+                  <Button 
+                    variant="secondary" 
+                    className="w-full bg-white text-amber-700 hover:bg-amber-50 shadow-lg"
+                    onClick={handleWhatsAppClick}
+                  >
                     Chat on WhatsApp
                   </Button>
                 </CardContent>

@@ -5,16 +5,24 @@ import Footer from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { Heart, Star, Gift, Sparkles, Award, Truck, Shield, Clock, Gem, Palette, Zap, Users, CheckCircle, MessageSquare } from "lucide-react"
+import { Heart, Star, Gift, Sparkles, Award, Truck, Shield, Clock, Gem, Palette, Zap, Users, CheckCircle, MessageSquare, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import TrustBadges from "@/components/features/trust-badges"
+import { generateGeneralMessage, getWhatsAppPhoneNumber, generateWhatsAppUrl } from "@/lib/whatsapp"
 
 export default function Home() {
   const [happyCustomers, setHappyCustomers] = useState(0)
   const [customerRating, setCustomerRating] = useState(0)
   const [ordersDelivered, setOrdersDelivered] = useState(0)
+
+  const handleWhatsAppClick = () => {
+    const phoneNumber = getWhatsAppPhoneNumber()
+    const message = generateGeneralMessage("I'm interested in your personalized stone art products. Can you help me?")
+    const whatsappUrl = generateWhatsAppUrl(phoneNumber, message)
+    window.open(whatsappUrl, '_blank')
+  }
 
   useEffect(() => {
     const animateCounters = () => {
@@ -116,6 +124,15 @@ export default function Home() {
                   Explore Collection
                 </Button>
               </Link>
+              <Button
+                variant="outline"
+                size="xl"
+                className="text-lg border-2 border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all"
+                onClick={handleWhatsAppClick}
+              >
+                <MessageCircle className="mr-2 h-5 w-5" />
+                Chat on WhatsApp
+              </Button>
             </motion.div>
           </motion.div>
         </div>

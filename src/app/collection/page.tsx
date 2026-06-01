@@ -6,13 +6,14 @@ import Footer from "@/components/layout/footer"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { Heart, Star, ShoppingCart, Filter, Grid, Heart as HeartFilled, Sparkles, Eye, ShoppingCart as CartFilled, X, ChevronDown } from "lucide-react"
+import { Heart, Star, ShoppingCart, Filter, Grid, Heart as HeartFilled, Sparkles, Eye, ShoppingCart as CartFilled, X, ChevronDown, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { useCartStore } from "@/stores/cart-store"
 import { useWishlistStore } from "@/stores/wishlist-store"
 import { products } from "@/lib/products"
 import Image from "next/image"
 import { Slider } from "@/components/ui/slider"
+import { generateProductMessage, getWhatsAppPhoneNumber, generateWhatsAppUrl } from "@/lib/whatsapp"
 
 export default function CollectionPage() {
   const addItem = useCartStore((state) => state.addItem)
@@ -91,6 +92,19 @@ export default function CollectionPage() {
     setPriceRange([2000])
     setSortBy("featured")
     setCurrentPage(1)
+  }
+
+  const handleWhatsAppClick = (product: any) => {
+    const phoneNumber = getWhatsAppPhoneNumber()
+    const productUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/collection`
+    const message = generateProductMessage({
+      productName: product.name,
+      productUrl,
+      productPrice: product.price,
+      customMessage: "I'm interested in this product. Please provide more details."
+    })
+    const whatsappUrl = generateWhatsAppUrl(phoneNumber, message)
+    window.open(whatsappUrl, '_blank')
   }
 
   return (
@@ -327,12 +341,14 @@ export default function CollectionPage() {
                         </>
                       )}
                     </Button>
-                    <Link href="/customize" className="flex-1">
-                      <Button variant="outline" className="w-full hover:bg-amber-50 dark:hover:bg-gray-700 text-sm">
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Customize
-                      </Button>
-                    </Link>
+                    <Button
+                      variant="outline"
+                      className="flex-1 hover:bg-green-50 dark:hover:bg-green-900/20 border-green-600 text-green-600 text-sm"
+                      onClick={() => handleWhatsAppClick(product)}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      WhatsApp
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

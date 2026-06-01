@@ -9,8 +9,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { motion } from "framer-motion"
-import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Gift } from "lucide-react"
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Gift, MessageCircle } from "lucide-react"
 import { useCartStore } from "@/stores/cart-store"
+import { generateCartMessage, getWhatsAppPhoneNumber, generateWhatsAppUrl } from "@/lib/whatsapp"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore()
@@ -41,6 +42,21 @@ export default function CartPage() {
     } else {
       alert("Invalid coupon code")
     }
+  }
+
+  const handleWhatsAppClick = () => {
+    const phoneNumber = getWhatsAppPhoneNumber()
+    const cartItems = items.map(item => ({
+      name: item.name || 'Custom Stone Art',
+      price: item.price,
+      quantity: item.quantity
+    }))
+    const message = generateCartMessage({
+      cartItems,
+      customMessage: "I'd like to place an order for these items."
+    })
+    const whatsappUrl = generateWhatsAppUrl(phoneNumber, message)
+    window.open(whatsappUrl, '_blank')
   }
 
   if (items.length === 0) {
@@ -240,6 +256,16 @@ export default function CartPage() {
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
+
+                <Button
+                  variant="outline"
+                  size="xl"
+                  className="w-full border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                  onClick={handleWhatsAppClick}
+                >
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Order via WhatsApp
+                </Button>
 
                 <div className="mt-4 text-center text-sm text-gray-500">
                   <p>🔒 Secure checkout powered by Razorpay & Stripe</p>
